@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+numpy
+matplotlib
+opencv-python
+Pillow
+sounddevice
+=======
+numpy
+matplotlib
+opencv-python
+Pillow
+sounddevice
+>>>>>>> 2a6a7860264dd50d37e7afb397399ab6ef149122
+pyserial
