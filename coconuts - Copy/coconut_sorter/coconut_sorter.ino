@@ -1,4 +1,8 @@
 // ---------------- ULTRASONIC SENSOR PINS ----------------
+// These were originally used to detect coconuts at the chute before
+// firing a relay.  Routing is now based on fixed time delays, so the
+// chute sensors are effectively unused but left defined in case the
+// hardware is ever re‑enabled.
 #define TAP_TRIG 13
 #define TAP_ECHO 12
 
@@ -126,36 +130,25 @@ void loop() {
       if(pendingRoute != 0){
 
         int relayPin = -1;
-        bool detected = false;
+        unsigned long delayMs = 0;
 
+        // pick relay pin and delay based on requested route
         if(pendingRoute == 1){
-
-          relayPin = MALAUHOG_RELAY;
-          long d = readUltrasonic(MALAUHOG_TRIG, MALAUHOG_ECHO);
-          if(d > 0 && d < DIST_THRESHOLD) detected = true;
-
+          relayPin   = MALAUHOG_RELAY;
+          delayMs    = 1000UL;   // 1 second
         }
-
         else if(pendingRoute == 2){
-
-          relayPin = MALAKATAD_RELAY;
-          long d = readUltrasonic(MALAKATAD_TRIG, MALAKATAD_ECHO);
-          if(d > 0 && d < DIST_THRESHOLD) detected = true;
-
+          relayPin   = MALAKATAD_RELAY;
+          delayMs    = 4000UL;   // 4 seconds
         }
-
         else if(pendingRoute == 3){
-
-          relayPin = MALAKANIN_RELAY;
-          long d = readUltrasonic(MALAKANIN_TRIG, MALAKANIN_ECHO);
-          if(d > 0 && d < DIST_THRESHOLD) detected = true;
-
+          relayPin   = MALAKANIN_RELAY;
+          delayMs    = 6000UL;   // 6 seconds
         }
 
-        // Fire relay after 1 second delay on detection — gives time to push coconut
-        if(detected){
-
-          delay(1000);  // 1 second delay before firing relay
+        // simply wait the configured time before firing the relay
+        if(relayPin != -1){
+          delay(delayMs);
 
           digitalWrite(relayPin, HIGH);
           delay(500);
@@ -167,25 +160,13 @@ void loop() {
 
           pendingRoute = 0;
           currentState = COMPLETE;
-
         }
 
-        // Timeout fallback — force relay if coconut never detected
+        // timeout fallback is no longer needed but keep for safety
         else if(millis() - routeStart > ROUTE_TIMEOUT_MS){
-
-          delay(1000);  // 1 second delay before firing relay
-
-          if(relayPin != -1){
-            digitalWrite(relayPin, HIGH);
-            delay(500);
-            digitalWrite(relayPin, LOW);
-          }
-
           Serial.println("ROUTE_TIMEOUT");
-
           pendingRoute = 0;
           currentState = COMPLETE;
-
         }
       }
 
